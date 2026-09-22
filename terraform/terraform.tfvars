@@ -14,3 +14,11 @@ github_repo  = "projet-final-AJC"
 backup_retention_days = 30
 logs_retention_days   = 30
 force_destroy_buckets = false
+
+master_authorized_cidr = "0.0.0.0/0"
+
+node_machine_type = "e2-standard-2"
+node_count        = 2
+node_disk_type    = "pd-standard"
+node_disk_size_gb = 50
+bastion_machine_type = "e2-micro"

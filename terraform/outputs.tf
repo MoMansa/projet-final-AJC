@@ -37,3 +37,33 @@ output "logs_bucket_name" {
   description = "Nom du bucket d'exports de journaux"
   value       = module.stockage.logs_bucket_name
 }
+
+output "cluster_name" {
+  description = "Nom du cluster GKE"
+  value       = module.compute.cluster_name
+}
+
+output "cluster_location" {
+  description = "Zone du cluster GKE"
+  value       = module.compute.cluster_location
+}
+
+output "node_pool_name" {
+  description = "Nom du node pool"
+  value       = module.compute.node_pool_name
+}
+
+output "gke_service_account_email" {
+  description = "Compte de service des nœuds GKE"
+  value       = module.compute.gke_service_account_email
+}
+
+output "bastion_name" {
+  description = "Nom de la VM bastion"
+  value       = module.compute.bastion_name
+}
+
+output "bastion_internal_ip" {
+  description = "Adresse privée du bastion"
+  value       = module.compute.bastion_internal_ip
+}

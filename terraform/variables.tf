@@ -65,3 +65,33 @@ variable "force_destroy_buckets" {
   type        = bool
   default     = false
 }
+
+variable "master_authorized_cidr" {
+  description = "Plage autorisée à joindre l'endpoint public GKE"
+  type        = string
+}
+
+variable "node_machine_type" {
+  description = "Type de machine du node pool"
+  type        = string
+}
+
+variable "node_count" {
+  description = "Nombre initial de nœuds"
+  type        = number
+}
+
+variable "node_disk_type" {
+  description = "Type de disque des nœuds"
+  type        = string
+}
+
+variable "node_disk_size_gb" {
+  description = "Taille du disque de démarrage des nœuds"
+  type        = number
+}
+
+variable "bastion_machine_type" {
+  description = "Type de machine du bastion"
+  type        = string
+}
