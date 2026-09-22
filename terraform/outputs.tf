@@ -27,3 +27,13 @@ output "nat_name" {
   description = "Nom du Cloud NAT"
   value       = module.reseau.nat_name
 }
+
+output "backup_bucket_name" {
+  description = "Nom du bucket de sauvegardes"
+  value       = module.stockage.backup_bucket_name
+}
+
+output "logs_bucket_name" {
+  description = "Nom du bucket d'exports de journaux"
+  value       = module.stockage.logs_bucket_name
+}
