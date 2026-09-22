@@ -47,3 +47,21 @@ variable "master_ipv4_cidr" {
   description = "Plage privée du plan de contrôle GKE"
   type        = string
 }
+
+variable "backup_retention_days" {
+  description = "Durée de conservation des sauvegardes"
+  type        = number
+  default     = 30
+}
+
+variable "logs_retention_days" {
+  description = "Durée de conservation des journaux"
+  type        = number
+  default     = 30
+}
+
+variable "force_destroy_buckets" {
+  description = "Autorise la suppression des buckets non vides"
+  type        = bool
+  default     = false
+}

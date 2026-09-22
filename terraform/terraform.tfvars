@@ -10,3 +10,7 @@ master_ipv4_cidr = "172.16.2.0/28"
 
 github_owner = "MoMansa"
 github_repo  = "projet-final-AJC"
+
+backup_retention_days = 30
+logs_retention_days   = 30
+force_destroy_buckets = false
