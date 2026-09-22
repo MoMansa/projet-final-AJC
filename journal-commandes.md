@@ -29,3 +29,36 @@ touch \
   terraform/modules/stockage/variables.tf \
   terraform/modules/stockage/outputs.tf
 ```
+
+### Export des variables d'environnement associées au projet
+
+```bash
+export EQUIPE="b"
+export PROJECT="poei-formation-gcp"
+export REGION="europe-west3"
+export ZONE="europe-west3-b"
+
+export RESOURCE_PREFIX="foodtrack-b"
+
+export VPC_NAME="foodtrack-b-vpc"
+export SUBNET_NAME="foodtrack-b-subnet"
+export ROUTER_NAME="foodtrack-b-router"
+export NAT_NAME="foodtrack-b-nat"
+export CLUSTER_NAME="foodtrack-b-cluster"
+export NODE_POOL_NAME="foodtrack-b-pool"
+export BASTION_NAME="foodtrack-b-bastion"
+export AR_REPOSITORY="foodtrack-b-images"
+
+export TFSTATE_BUCKET="foodtrack-b-tfstate-poei-formation-gcp"
+```
+
+### Creation du bucket initial de backend pour terraform
+
+```bash
+(base) allan@allan-fedora:~/Documents/Formation/AJC/Projet_final_multicloud/projet-final-AJC/terraform$ gcloud storage buckets create "gs://foodtrack-${EQUIPE}-tfstate-${PROJECT}" --location="$REGION" --uniform-bucket-level-access
+Creating gs://foodtrack-b-tfstate-poei-formation-gcp/...
+(base) allan@allan-fedora:~/Documents/Formation/AJC/Projet_final_multicloud/projet-final-AJC/terraform$ gcloud storage buckets update "gs://foodtrack-${EQUIPE}-tfstate-${PROJECT}" --versioning
+Updating gs://foodtrack-b-tfstate-poei-formation-gcp/...                                                                                                                  
+  Completed 1                                                                                                                                                             
+(base) allan@allan-fedora:~/Documents/Formation/AJC/Projet_final_multicloud/projet-final-AJC/terraform$ 
+```
