@@ -55,3 +55,13 @@ resource "google_storage_bucket" "logs" {
     }
   }
 }
+
+# Creation d'un repository Artifact Registry pour stocker les images Docker
+
+resource "google_artifact_registry_repository" "images" {
+  project       = var.project_id
+  location      = var.region
+  repository_id = local.artifact_repository_name
+  description   = "Images Docker FoodTrack - equipe B"
+  format        = "DOCKER"
+}

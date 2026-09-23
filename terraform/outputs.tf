@@ -67,3 +67,8 @@ output "bastion_internal_ip" {
   description = "Adresse privée du bastion"
   value       = module.compute.bastion_internal_ip
 }
+
+output "artifact_repository_url" {
+  description = "Adresse du dépôt Docker pour la chaîne de livraison"
+  value       = module.stockage.artifact_repository_url
+}

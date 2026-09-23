@@ -29,12 +29,12 @@ module "compute" {
   zone            = var.zone
   resource_prefix = var.resource_prefix
 
-  network_id         = module.reseau.network_id
-  subnetwork_id      = module.reseau.subnetwork_id
-  pods_range_name    = module.reseau.pods_range_name
+  network_id          = module.reseau.network_id
+  subnetwork_id       = module.reseau.subnetwork_id
+  pods_range_name     = module.reseau.pods_range_name
   services_range_name = module.reseau.services_range_name
 
-  master_ipv4_cidr      = var.master_ipv4_cidr
+  master_ipv4_cidr       = var.master_ipv4_cidr
   master_authorized_cidr = var.master_authorized_cidr
 
   node_machine_type = var.node_machine_type

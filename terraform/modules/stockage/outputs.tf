@@ -17,3 +17,13 @@ output "logs_bucket_url" {
   description = "URL GCS du bucket d'exports de journaux"
   value       = google_storage_bucket.logs.url
 }
+
+output "artifact_repository_name" {
+  description = "Nom du dépôt Docker Artifact Registry"
+  value       = google_artifact_registry_repository.images.repository_id
+}
+
+output "artifact_repository_url" {
+  description = "Adresse du dépôt Docker Artifact Registry"
+  value       = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.images.repository_id}"
+}

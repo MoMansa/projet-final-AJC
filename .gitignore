@@ -3,6 +3,7 @@
 
 # États et plans Terraform
 *.tfstate
+/terraform/terraform.tfvars
 *.tfstate.*
 *.tfplan
 crash.log

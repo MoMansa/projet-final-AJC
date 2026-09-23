@@ -1,8 +1,8 @@
 locals {
-  cluster_name              = "${var.resource_prefix}-cluster"
-  node_pool_name            = "${var.resource_prefix}-pool"
-  gke_service_account_id    = "${var.resource_prefix}-gke-nodes"
-  bastion_name              = "${var.resource_prefix}-bastion"
+  cluster_name               = "${var.resource_prefix}-cluster"
+  node_pool_name             = "${var.resource_prefix}-pool"
+  gke_service_account_id     = "${var.resource_prefix}-gke-nodes"
+  bastion_name               = "${var.resource_prefix}-bastion"
   bastion_service_account_id = "${var.resource_prefix}-bastion"
 
   gke_node_roles = toset([
