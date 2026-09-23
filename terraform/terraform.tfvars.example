@@ -1,0 +1,27 @@
+# Copier ce fichier vers terraform.tfvars, puis remplacer toutes les valeurs
+
+project_id      = "PROJECT_ID"
+region          = "REGION"
+zone            = "ZONE"
+resource_prefix = "PREFIX"
+
+subnet_cidr      = "SUBNET_CIDR"
+pods_cidr        = "PODS_CIDR"
+services_cidr    = "SERVICES_CIDR"
+master_ipv4_cidr = "MASTER_CIDR"
+
+github_owner = "GITHUB_OWNER"
+github_repo  = "GITHUB_REPO"
+
+backup_retention_days = 30
+logs_retention_days   = 30
+force_destroy_buckets = false
+
+# Définir la plage autorisée et documenter le choix.
+master_authorized_cidr = "AUTHORIZED_CIDR"
+
+node_machine_type    = "MACHINE_TYPE"
+node_count           = 1
+node_disk_type       = "pd-standard"
+node_disk_size_gb    = 30
+bastion_machine_type = "BASTION_TYPE"
