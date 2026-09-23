@@ -72,3 +72,11 @@ output "artifact_repository_url" {
   description = "Adresse du dépôt Docker pour la chaîne de livraison"
   value       = module.stockage.artifact_repository_url
 }
+
+output "wif_provider_name" {
+  value = module.wif_github.wif_provider_name
+}
+
+output "ci_service_account_email" {
+  value = module.wif_github.ci_service_account_email
+}
