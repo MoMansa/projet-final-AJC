@@ -1,0 +1,255 @@
+# FoodTrack - projet final - squelette de workflow GitHub Actions
+#
+# A COPIER dans .github/workflows/deploy.yml de votre depot, puis a completer.
+#
+# Ce qui est fourni : le bloc d authentification sans cle (OIDC vers Google
+# Cloud) et la recuperation des acces au cluster. Ces deux etapes sont les plus
+# penibles a mettre au point et ne portent aucune valeur pedagogique une fois
+# comprises - en revanche, vous devez savoir les EXPLIQUER en soutenance.
+#
+# Ce qui est a votre charge : tout le reste, marque "A FAIRE".
+#
+# Aucun SECRET n est necessaire. Si vous en ajoutez un qui contient une cle
+# JSON, vous avez rate l exercice.
+
+name: foodtrack
+
+on:
+  push:
+    branches: [develop, main]
+    tags: ["v*"]
+  pull_request:
+    branches: [develop, main]
+
+# Obligatoire pour que GitHub emette un jeton OIDC.
+# Sans "id-token: write", l etape d authentification echoue sans explication utile.
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  IMAGE_NAME: portail-qualite
+  GCP_PROJECT_ID: "form-gke-eleve02-618b"
+  GCP_REGION: "europe-west3"
+  GCP_ZONE: "europe-west3-b"
+  GKE_CLUSTER: "foodtrack-b-cluster"
+  WIF_PROVIDER: "projects/967899955534/locations/global/workloadIdentityPools/github-pool/providers/github-provider"
+  CI_SERVICE_ACCOUNT: "foodtrack-ci@form-gke-eleve02-618b.iam.gserviceaccount.com"
+  AR_REPOSITORY: "foodtrack-b-images"
+
+jobs:
+
+  qualite:
+    name: Lint et scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: "1.16.3"
+
+      - name: Verifier Terraform
+        run: |
+          terraform -chdir=terraform fmt -check -recursive
+          terraform -chdir=terraform init -backend=false
+          terraform -chdir=terraform validate
+
+      - name: Verifier les manifestes Kubernetes
+        run: |
+          docker run --rm -v "$PWD/manifests:/manifests:ro" \
+            ghcr.io/yannh/kubeconform:v0.7.0 \
+            -strict -summary -kubernetes-version 1.34.0 \
+          -ignore-filename-pattern '(^|/)kustomization\.ya?ml$' /manifests
+
+      - name: Scanner les configurations
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: config
+          scan-ref: .
+          severity: CRITICAL
+          exit-code: "1"
+
+  build:
+    name: Build et publication de l image
+    needs: qualite
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      # --- FOURNI : authentification sans cle -------------------------------
+      # GitHub emet un jeton OIDC signe qui decrit l execution en cours (depot,
+      # branche, auteur). Google Cloud verifie cette signature aupres de GitHub,
+      # applique la condition d attribut definie dans le fournisseur, puis rend
+      # un jeton d acces au nom du compte de service demande.
+      - id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: ${{ env.CI_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@v3
+
+      - name: Autoriser Docker aupres d Artifact Registry
+        run: gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev --quiet
+      # --- fin du bloc fourni ------------------------------------------------
+
+      - uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: "1.16.3"
+
+      - name: Afficher le plan Terraform
+        run: |
+          terraform -chdir=terraform init
+          terraform -chdir=terraform plan
+
+      - name: Construire et publier l image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ci/Dockerfile.portail
+          push: true
+          tags: ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.AR_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      - name: Scanner l image publiee
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: image
+          image-ref: ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.AR_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+
+  deploy-dev:
+    name: Deploiement dev
+    needs: build
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    environment:
+      name: development
+    steps:
+      - uses: actions/checkout@v5
+
+      # --- FOURNI : acces au cluster ----------------------------------------
+      - id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: ${{ env.CI_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/get-gke-credentials@v3
+        with:
+          cluster_name: ${{ env.GKE_CLUSTER }}
+          location: ${{ env.GCP_ZONE }}
+      # --- fin du bloc fourni ------------------------------------------------
+
+      - name: Appliquer les manifestes dev
+        run: kubectl apply -n foodtrack-dev -f manifests/dev/
+
+      - name: Mettre a jour l image du portail
+        run: |
+          kubectl set image deployment/portail-qualite \
+            nginx=${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.AR_REPOSITORY }}/${IMAGE_NAME}:${GITHUB_SHA} \
+            -n foodtrack-dev
+
+      - name: Attendre les deploiements
+        run: |
+          kubectl rollout status deployment/portail-qualite -n foodtrack-dev --timeout=300s
+          kubectl rollout status deployment/api-capteurs -n foodtrack-dev --timeout=300s
+          kubectl rollout status statefulset/cache-releves -n foodtrack-dev --timeout=300s
+
+      - name: Verifier l application
+        run: |
+          kubectl port-forward -n foodtrack-dev svc/portail-qualite 8080:8080 >/tmp/port-forward.log 2>&1 &
+          PID=$!
+          trap 'kill "$PID" 2>/dev/null || true' EXIT
+          curl -fsS --retry 12 --retry-connrefused --retry-delay 2 http://localhost:8080/healthz
+          curl -fsS http://localhost:8080/api/
+
+  deploy-test:
+    name: Deploiement test
+    needs: deploy-dev
+    runs-on: ubuntu-latest
+    environment:
+      name: test
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: ${{ env.CI_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/get-gke-credentials@v3
+        with:
+          cluster_name: ${{ env.GKE_CLUSTER }}
+          location: ${{ env.GCP_ZONE }}
+
+      - name: Appliquer les manifestes test
+        run: kubectl apply -n foodtrack-test -f manifests/test/
+
+      - name: Mettre a jour l image du portail
+        run: |
+          kubectl set image deployment/portail-qualite \
+            nginx=${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.AR_REPOSITORY }}/${IMAGE_NAME}:${GITHUB_SHA} \
+            -n foodtrack-test
+
+      - name: Attendre les deploiements
+        run: |
+          kubectl rollout status deployment/portail-qualite -n foodtrack-test --timeout=300s
+          kubectl rollout status deployment/api-capteurs -n foodtrack-test --timeout=300s
+          kubectl rollout status statefulset/cache-releves -n foodtrack-test --timeout=300s
+
+      - name: Verifier l application
+        run: |
+          kubectl port-forward -n foodtrack-test svc/portail-qualite 8080:8080 >/tmp/port-forward.log 2>&1 &
+          PID=$!
+          trap 'kill "$PID" 2>/dev/null || true' EXIT
+          curl -fsS --retry 12 --retry-connrefused --retry-delay 2 http://localhost:8080/healthz
+          curl -fsS http://localhost:8080/api/
+
+  deploy-prod:
+    name: Deploiement production
+    needs: deploy-test
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: ${{ env.CI_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/get-gke-credentials@v3
+        with:
+          cluster_name: ${{ env.GKE_CLUSTER }}
+          location: ${{ env.GCP_ZONE }}
+
+      - name: Appliquer les manifestes production
+        run: kubectl apply -n foodtrack-prod -f manifests/prod/
+
+      - name: Mettre a jour l image du portail
+        run: |
+          kubectl set image deployment/portail-qualite \
+            nginx=${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.AR_REPOSITORY }}/${IMAGE_NAME}:${GITHUB_SHA} \
+            -n foodtrack-prod
+
+      - name: Attendre les deploiements
+        run: |
+          kubectl rollout status deployment/portail-qualite -n foodtrack-prod --timeout=300s
+          kubectl rollout status deployment/api-capteurs -n foodtrack-prod --timeout=300s
+          kubectl rollout status statefulset/cache-releves -n foodtrack-prod --timeout=300s
+
+      - name: Verifier l application
+        run: |
+          kubectl port-forward -n foodtrack-prod svc/portail-qualite 8080:8080 >/tmp/port-forward.log 2>&1 &
+          PID=$!
+          trap 'kill "$PID" 2>/dev/null || true' EXIT
+          curl -fsS --retry 12 --retry-connrefused --retry-delay 2 http://localhost:8080/healthz
+          curl -fsS http://localhost:8080/api/
