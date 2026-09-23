@@ -189,7 +189,7 @@ jobs:
           location: ${{ env.GCP_ZONE }}
 
       - name: Appliquer les manifestes test
-        run: kubectl apply -n foodtrack-test -f manifests/test/
+        run: kubectl apply -n foodtrack-prod -k manifests/k8s/overlays/prod/
 
       - name: Mettre a jour l image du portail
         run: |
