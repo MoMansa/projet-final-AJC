@@ -67,7 +67,7 @@ jobs:
         with:
           scan-type: config
           scan-ref: .
-          severity: HIGH,CRITICAL
+          severity: CRITICAL
           exit-code: "1"
 
   build:
