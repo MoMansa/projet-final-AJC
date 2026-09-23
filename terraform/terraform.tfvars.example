@@ -1,27 +1,24 @@
-# Copier ce fichier vers terraform.tfvars, puis remplacer toutes les valeurs
+project_id      = "form-gke-eleve02-618b"
+region          = "europe-west3"
+zone            = "europe-west3-b"
+resource_prefix = "foodtrack-b"
 
-project_id      = "PROJECT_ID"
-region          = "REGION"
-zone            = "ZONE"
-resource_prefix = "PREFIX"
+subnet_cidr      = "10.20.0.0/20"
+pods_cidr        = "10.21.0.0/16"
+services_cidr    = "10.22.0.0/20"
+master_ipv4_cidr = "172.16.2.0/28"
 
-subnet_cidr      = "SUBNET_CIDR"
-pods_cidr        = "PODS_CIDR"
-services_cidr    = "SERVICES_CIDR"
-master_ipv4_cidr = "MASTER_CIDR"
-
-github_owner = "GITHUB_OWNER"
-github_repo  = "GITHUB_REPO"
+github_owner = "MoMansa"
+github_repo  = "projet-final-AJC"
 
 backup_retention_days = 30
 logs_retention_days   = 30
 force_destroy_buckets = false
 
-# Définir la plage autorisée et documenter le choix.
-master_authorized_cidr = "AUTHORIZED_CIDR"
+master_authorized_cidr = "0.0.0.0/0"
 
-node_machine_type    = "MACHINE_TYPE"
-node_count           = 1
+node_machine_type    = "e2-standard-2"
+node_count           = 2
 node_disk_type       = "pd-standard"
-node_disk_size_gb    = 30
-bastion_machine_type = "BASTION_TYPE"
+node_disk_size_gb    = 50
+bastion_machine_type = "e2-micro"
