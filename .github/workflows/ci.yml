@@ -103,7 +103,7 @@ jobs:
       - name: Afficher le plan Terraform
         run: |
           terraform -chdir=terraform init
-          terraform -chdir=terraform plan
+          terraform -chdir=terraform plan -input=false -var-file="terraform.tfvars"
 
       - name: Construire et publier l image
         uses: docker/build-push-action@v7
