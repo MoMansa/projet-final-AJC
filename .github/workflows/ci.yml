@@ -146,7 +146,7 @@ jobs:
       # --- fin du bloc fourni ------------------------------------------------
 
       - name: Appliquer les manifestes dev
-        run: kubectl apply -n foodtrack-dev -f manifests/dev/
+        run: kubectl apply -n foodtrack-dev -k manifests/k8s/overlays/dev/
 
       - name: Mettre a jour l image du portail
         run: |
