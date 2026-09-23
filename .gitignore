@@ -1,0 +1,29 @@
+# Cache et providers téléchargés par Terraform
+**/.terraform/*
+
+# États et plans Terraform
+*.tfstate
+/terraform/terraform.tfvars
+*.tfstate.*
+*.tfplan
+crash.log
+
+# Variables potentiellement sensibles
+*.auto.tfvars
+*.auto.tfvars.json
+secret*.tfvars
+secrets/
+
+# Identifiants
+.env
+.env.*
+*.pem
+*.key
+*-key.json
+service-account*.json
+application_default_credentials.json
+
+# Éditeurs et système
+.vscode/
+.idea/
+.DS_Store
