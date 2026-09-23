@@ -9,14 +9,6 @@
 #
 # Ce qui est a votre charge : tout le reste, marque "A FAIRE".
 #
-# Variables a definir dans Settings > Secrets and variables > Actions > Variables :
-#   GCP_PROJECT_ID        ex: foodtrack-equipe-a
-#   GCP_REGION            ex: europe-west8
-#   GCP_ZONE              ex: europe-west8-b
-#   GKE_CLUSTER           ex: foodtrack-a-cluster
-#   WIF_PROVIDER          sortie Terraform "wif_provider_name" du module fourni
-#   CI_SERVICE_ACCOUNT    sortie Terraform "ci_service_account_email"
-#
 # Aucun SECRET n est necessaire. Si vous en ajoutez un qui contient une cle
 # JSON, vous avez rate l exercice.
 
@@ -37,6 +29,13 @@ permissions:
 
 env:
   IMAGE_NAME: portail-qualite
+  GCP_PROJECT_ID: "form-gke-eleve02-618b"
+  GCP_REGION: "europe-west3"
+  GCP_ZONE: "europe-west3-b"
+  GKE_CLUSTER: "foodtrack-b-cluster"
+  WIF_PROVIDER: "projects/967899955534/locations/global/workloadIdentityPools/github-pool/providers/github-provider"
+  CI_SERVICE_ACCOUNT: "foodtrack-ci@form-gke-eleve02-618b.iam.gserviceaccount.com"
+  AR_REPOSITORY: "foodtrack-b-images"
 
 jobs:
 
@@ -86,14 +85,14 @@ jobs:
       - id: auth
         uses: google-github-actions/auth@v3
         with:
-          project_id: ${{ vars.GCP_PROJECT_ID }}
-          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
-          service_account: ${{ vars.CI_SERVICE_ACCOUNT }}
+          project_id: ${{ env.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: ${{ env.CI_SERVICE_ACCOUNT }}
 
       - uses: google-github-actions/setup-gcloud@v3
 
       - name: Autoriser Docker aupres d Artifact Registry
-        run: gcloud auth configure-docker ${{ vars.GCP_REGION }}-docker.pkg.dev --quiet
+        run: gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev --quiet
       # --- fin du bloc fourni ------------------------------------------------
 
       - uses: hashicorp/setup-terraform@v4
@@ -111,13 +110,13 @@ jobs:
           context: .
           file: ci/Dockerfile.portail
           push: true
-          tags: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.AR_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          tags: ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.AR_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
       - name: Scanner l image publiee
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: image
-          image-ref: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.AR_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          image-ref: ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.AR_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           severity: HIGH,CRITICAL
           exit-code: "1"
 
@@ -135,14 +134,14 @@ jobs:
       - id: auth
         uses: google-github-actions/auth@v3
         with:
-          project_id: ${{ vars.GCP_PROJECT_ID }}
-          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
-          service_account: ${{ vars.CI_SERVICE_ACCOUNT }}
+          project_id: ${{ env.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: ${{ env.CI_SERVICE_ACCOUNT }}
 
       - uses: google-github-actions/get-gke-credentials@v3
         with:
-          cluster_name: ${{ vars.GKE_CLUSTER }}
-          location: ${{ vars.GCP_ZONE }}
+          cluster_name: ${{ env.GKE_CLUSTER }}
+          location: ${{ env.GCP_ZONE }}
       # --- fin du bloc fourni ------------------------------------------------
 
       - name: Appliquer les manifestes dev
@@ -151,7 +150,7 @@ jobs:
       - name: Mettre a jour l image du portail
         run: |
           kubectl set image deployment/portail-qualite \
-            nginx=${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.AR_REPOSITORY }}/${IMAGE_NAME}:${GITHUB_SHA} \
+            nginx=${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.AR_REPOSITORY }}/${IMAGE_NAME}:${GITHUB_SHA} \
             -n foodtrack-dev
 
       - name: Attendre les deploiements
@@ -179,14 +178,14 @@ jobs:
 
       - uses: google-github-actions/auth@v3
         with:
-          project_id: ${{ vars.GCP_PROJECT_ID }}
-          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
-          service_account: ${{ vars.CI_SERVICE_ACCOUNT }}
+          project_id: ${{ env.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: ${{ env.CI_SERVICE_ACCOUNT }}
 
       - uses: google-github-actions/get-gke-credentials@v3
         with:
-          cluster_name: ${{ vars.GKE_CLUSTER }}
-          location: ${{ vars.GCP_ZONE }}
+          cluster_name: ${{ env.GKE_CLUSTER }}
+          location: ${{ env.GCP_ZONE }}
 
       - name: Appliquer les manifestes test
         run: kubectl apply -n foodtrack-test -f manifests/test/
@@ -194,7 +193,7 @@ jobs:
       - name: Mettre a jour l image du portail
         run: |
           kubectl set image deployment/portail-qualite \
-            nginx=${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.AR_REPOSITORY }}/${IMAGE_NAME}:${GITHUB_SHA} \
+            nginx=${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.AR_REPOSITORY }}/${IMAGE_NAME}:${GITHUB_SHA} \
             -n foodtrack-test
 
       - name: Attendre les deploiements
@@ -222,14 +221,14 @@ jobs:
 
       - uses: google-github-actions/auth@v3
         with:
-          project_id: ${{ vars.GCP_PROJECT_ID }}
-          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
-          service_account: ${{ vars.CI_SERVICE_ACCOUNT }}
+          project_id: ${{ env.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: ${{ env.CI_SERVICE_ACCOUNT }}
 
       - uses: google-github-actions/get-gke-credentials@v3
         with:
-          cluster_name: ${{ vars.GKE_CLUSTER }}
-          location: ${{ vars.GCP_ZONE }}
+          cluster_name: ${{ env.GKE_CLUSTER }}
+          location: ${{ env.GCP_ZONE }}
 
       - name: Appliquer les manifestes production
         run: kubectl apply -n foodtrack-prod -f manifests/prod/
@@ -237,7 +236,7 @@ jobs:
       - name: Mettre a jour l image du portail
         run: |
           kubectl set image deployment/portail-qualite \
-            nginx=${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.AR_REPOSITORY }}/${IMAGE_NAME}:${GITHUB_SHA} \
+            nginx=${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.AR_REPOSITORY }}/${IMAGE_NAME}:${GITHUB_SHA} \
             -n foodtrack-prod
 
       - name: Attendre les deploiements
