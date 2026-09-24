@@ -59,6 +59,9 @@ jobs:
         shell: bash
         run: |
           for env in dev test prod; do
+            cp manifests/k8s/overlays/$env/secret.env.example manifests/k8s/overlays/$env/secret.env
+          done
+          for env in dev test prod; do
             echo "--- $env"
             kubectl kustomize manifests/k8s/overlays/$env \
               | docker run -i --rm ghcr.io/yannh/kubeconform:v0.7.0 \
