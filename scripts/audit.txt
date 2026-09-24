@@ -1,0 +1,49 @@
+== Roles sur le projet ==
+ROLE          MEMBERS
+roles/editor  serviceAccount:967899955534-compute@developer.gserviceaccount.com
+roles/editor  user:21diouf.pape@gmail.com
+roles/editor  user:allanringeval@gmail.com
+roles/editor  user:fjf.salmon@gmail.com
+roles/editor  user:louishadrien35000@gmail.com
+roles/editor  user:vivi78500@gmail.com
+roles/owner   user:adrien.voss@gmail.com
+
+== Comptes de service ==
+DISPLAY NAME                             EMAIL                                                                DISABLED
+Compute Engine default service account   967899955534-compute@developer.gserviceaccount.com                   False
+Compte de service du pipeline FoodTrack  foodtrack-ci@form-gke-eleve02-618b.iam.gserviceaccount.com           False
+Bastion FoodTrack ?quipe B               foodtrack-b-bastion@form-gke-eleve02-618b.iam.gserviceaccount.com    False
+N?uds GKE FoodTrack ?quipe B             foodtrack-b-gke-nodes@form-gke-eleve02-618b.iam.gserviceaccount.com  False
+
+== Pare-feu ==
+NAME                                  SOURCE_RANGES    TARGET_TAGS                            ALLOW
+default-allow-icmp                    0.0.0.0/0                                               icmp
+default-allow-internal                10.128.0.0/9                                            tcp:0-65535,udp:0-65535,icmp
+default-allow-rdp                     0.0.0.0/0                                               tcp:3389
+default-allow-ssh                     0.0.0.0/0                                               tcp:22
+foodtrack-b-allow-iap-ssh             35.235.240.0/20  foodtrack-b-bastion                    tcp:22
+gke-foodtrack-b-cluster-d389419f-all  10.21.0.0/16     gke-foodtrack-b-cluster-d389419f-node  tcp,udp,icmp,esp,ah,sctp
+gke-foodtrack-b-cluster-d389419f-vms  10.20.0.0/20     gke-foodtrack-b-cluster-d389419f-node  udp:1-65535,icmp,tcp:1-65535
+
+== Bastion ==
+metadata:
+  items:
+  - key: block-project-ssh-keys
+    value: 'TRUE'
+  - key: enable-oslogin
+    value: 'TRUE'
+
+== Exposition du plan de controle ==
+masterAuthorizedNetworksConfig:
+  cidrBlocks:
+  - cidrBlock: 0.0.0.0/0
+    displayName: github-hosted-runners
+  enabled: true
+  privateEndpointEnforcementEnabled: true
+privateClusterConfig:
+  enablePrivateNodes: true
+  masterIpv4CidrBlock: 172.16.2.0/28
+  privateEndpoint: 172.16.2.2
+  publicEndpoint: 34.159.220.16
+
+== Secrets dans l'historique Git (lancer depuis le depot) ==

@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: foodtrack-config
+data:
+  SEUIL_TEMPERATURE_C: "4"
+  NIVEAU_JOURNAL: "warn"
+  index.html: |
+    <!doctype html>
+    <html lang="fr">
+      <head><meta charset="utf-8"><title>FoodTrack - suivi qualite</title></head>
+      <body>
+        <h1>FoodTrack - suivi qualite</h1>
+        <p>Tracabilite de la chaine du froid. API des releves de temperature sous /api/.</p>
+        <p>Environnement : production</p>
+      </body>
+    </html>

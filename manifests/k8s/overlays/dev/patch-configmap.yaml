@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: foodtrack-config
+data:
+  SEUIL_TEMPERATURE_C: "8"
+  NIVEAU_JOURNAL: "debug"

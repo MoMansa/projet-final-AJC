@@ -1,0 +1,12 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: foodtrack
+  annotations:
+    kubernetes.io/ingress.class: "gce"      # équilibreur HTTP(S) externe de GKE
+spec:
+  defaultBackend:
+    service:
+      name: portail-qualite
+      port:
+        number: 8080
