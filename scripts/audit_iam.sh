@@ -11,6 +11,7 @@ BASTION="foodtrack-${EQUIPE}-bastion"
 echo "== Roles sur le projet =="
 gcloud projects get-iam-policy "$PROJECT" \
   --flatten="bindings[].members" \
+  --filter="bindings.role=roles/editor OR bindings.role=roles/owner" \
   --format="table(bindings.role,bindings.members)"
 
 echo; echo "== Comptes de service =="
