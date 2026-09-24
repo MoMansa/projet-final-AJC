@@ -67,7 +67,7 @@ jobs:
         with:
           scan-type: config
           scan-ref: .
-          severity: CRITICAL
+          severity: HIGH,CRITICAL
           exit-code: "1"
 
   build:
@@ -118,7 +118,7 @@ jobs:
         with:
           scan-type: image
           image-ref: ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.AR_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-          severity: CRITICAL
+          severity: HIGH,CRITICAL
           exit-code: "1"
 
   deploy-dev:
