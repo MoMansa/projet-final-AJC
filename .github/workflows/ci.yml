@@ -146,7 +146,17 @@ jobs:
       # --- fin du bloc fourni ------------------------------------------------
 
       - name: Appliquer les manifestes dev
-        run: kubectl apply -n foodtrack-dev -k manifests/k8s/overlays/dev/
+        env:
+            INGEST_TOKEN: ${{ secrets.INGEST_TOKEN }}
+            CACHE_PASSWORD: ${{ secrets.CACHE_PASSWORD }}
+        run: |
+          test -n "$INGEST_TOKEN" && test -n "$CACHE_PASSWORD"
+          umask 077
+          secret_file=manifests/k8s/overlays/dev/secret.env
+          trap 'rm -f "$secret_file"' EXIT
+          printf 'INGEST_TOKEN=%s\nCACHE_PASSWORD=%s\n' \
+            "$INGEST_TOKEN" "$CACHE_PASSWORD" > "$secret_file"
+          kubectl apply -n foodtrack-dev -k manifests/k8s/overlays/dev/
 
       - name: Mettre a jour l image du portail
         run: |
@@ -189,7 +199,17 @@ jobs:
           location: ${{ env.GCP_ZONE }}
 
       - name: Appliquer les manifestes test
-        run: kubectl apply -n foodtrack-test -k manifests/k8s/overlays/test/
+        env:
+          INGEST_TOKEN: ${{ secrets.INGEST_TOKEN }}
+          CACHE_PASSWORD: ${{ secrets.CACHE_PASSWORD }}
+        run: |
+          test -n "$INGEST_TOKEN" && test -n "$CACHE_PASSWORD"
+          umask 077
+          secret_file=manifests/k8s/overlays/test/secret.env
+          trap 'rm -f "$secret_file"' EXIT
+          printf 'INGEST_TOKEN=%s\nCACHE_PASSWORD=%s\n' \
+            "$INGEST_TOKEN" "$CACHE_PASSWORD" > "$secret_file"
+          kubectl apply -n foodtrack-test -k manifests/k8s/overlays/test/
 
       - name: Mettre a jour l image du portail
         run: |
@@ -232,7 +252,17 @@ jobs:
           location: ${{ env.GCP_ZONE }}
 
       - name: Appliquer les manifestes production
-        run: kubectl apply -n foodtrack-prod -k manifests/k8s/overlays/prod/
+        env:
+          INGEST_TOKEN: ${{ secrets.INGEST_TOKEN }}
+          CACHE_PASSWORD: ${{ secrets.CACHE_PASSWORD }}
+        run: |
+          test -n "$INGEST_TOKEN" && test -n "$CACHE_PASSWORD"
+          umask 077
+          secret_file=manifests/k8s/overlays/prod/secret.env
+          trap 'rm -f "$secret_file"' EXIT
+          printf 'INGEST_TOKEN=%s\nCACHE_PASSWORD=%s\n' \
+            "$INGEST_TOKEN" "$CACHE_PASSWORD" > "$secret_file"
+          kubectl apply -n foodtrack-prod -k manifests/k8s/overlays/prod/
 
       - name: Mettre a jour l image du portail
         run: |
