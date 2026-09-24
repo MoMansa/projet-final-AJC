@@ -104,7 +104,13 @@ resource "google_container_cluster" "foodtrack" {
   }
 
   enable_shielded_nodes = true
+  monitoring_config {
+    enable_components = ["SYSTEM_COMPONENTS", "POD", "DEPLOYMENT", "STATEFULSET", "HPA"]
 
+    managed_prometheus {
+      enabled = true
+    }
+  }
 }
 
 # Node pool GKE

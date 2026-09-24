@@ -67,15 +67,16 @@ resource "google_monitoring_dashboard" "foodtrack_prod" {
     mosaicLayout = {
       columns = 12
       tiles = [
+        # Ligne 1 : processeur et memoire
         {
           width = 6, height = 4
           widget = {
-            title = "CPU (foodtrack-prod)"
+            title = "Processeur (foodtrack-prod)"
             xyChart = {
               dataSets = [{
                 timeSeriesQuery = { timeSeriesFilter = {
                   filter      = "metric.type=\"kubernetes.io/container/cpu/core_usage_time\" AND resource.type=\"k8s_container\" AND resource.labels.namespace_name=\"foodtrack-prod\""
-                  aggregation = { alignmentPeriod = "60s", perSeriesAligner = "ALIGN_RATE" }
+                  aggregation = { alignmentPeriod = "60s", perSeriesAligner = "ALIGN_RATE", crossSeriesReducer = "REDUCE_SUM", groupByFields = ["resource.labels.container_name"] }
                 } }
                 plotType = "LINE"
               }]
@@ -90,24 +91,24 @@ resource "google_monitoring_dashboard" "foodtrack_prod" {
               dataSets = [{
                 timeSeriesQuery = { timeSeriesFilter = {
                   filter      = "metric.type=\"kubernetes.io/container/memory/used_bytes\" AND resource.type=\"k8s_container\" AND resource.labels.namespace_name=\"foodtrack-prod\""
-                  aggregation = { alignmentPeriod = "60s", perSeriesAligner = "ALIGN_MEAN" }
+                  aggregation = { alignmentPeriod = "60s", perSeriesAligner = "ALIGN_MEAN", crossSeriesReducer = "REDUCE_SUM", groupByFields = ["resource.labels.container_name"] }
                 } }
                 plotType = "LINE"
               }]
             }
           }
         },
+        # Ligne 2 : pods prets et taux d'erreurs HTTP
         {
           yPos = 4, width = 6, height = 4
           widget = {
-            title = "Erreurs applicatives"
+            title = "Pods prets (foodtrack-prod)"
             xyChart = {
               dataSets = [{
-                timeSeriesQuery = { timeSeriesFilter = {
-                  filter      = "metric.type=\"logging.googleapis.com/user/${google_logging_metric.erreurs_prod.name}\""
-                  aggregation = { alignmentPeriod = "300s", perSeriesAligner = "ALIGN_SUM" }
-                } }
-                plotType = "STACKED_BAR"
+                timeSeriesQuery = {
+                  prometheusQuery = "sum by (pod) (kube_pod_status_ready{namespace=\"foodtrack-prod\", condition=\"true\"})"
+                }
+                plotType = "STACKED_AREA"
               }]
             }
           }
@@ -115,14 +116,45 @@ resource "google_monitoring_dashboard" "foodtrack_prod" {
         {
           xPos = 6, yPos = 4, width = 6, height = 4
           widget = {
-            title = "Latence du portail"
+            title = "Requetes HTTP par classe de code (2xx, 4xx, 5xx)"
             xyChart = {
               dataSets = [{
                 timeSeriesQuery = { timeSeriesFilter = {
-                  filter      = "metric.type=\"monitoring.googleapis.com/uptime_check/request_latency\" AND resource.type=\"uptime_url\" AND metric.label.\"check_id\"=\"${google_monitoring_uptime_check_config.portail_prod.uptime_check_id}\""
+                  filter      = "metric.type=\"loadbalancing.googleapis.com/https/request_count\" AND resource.type=\"https_lb_rule\" AND resource.labels.url_map_name=monitoring.regex.full_match(\".*foodtrack-prod.*\")"
+                  aggregation = { alignmentPeriod = "60s", perSeriesAligner = "ALIGN_RATE", crossSeriesReducer = "REDUCE_SUM", groupByFields = ["metric.labels.response_code_class"] }
+                } }
+                plotType = "STACKED_BAR"
+              }]
+            }
+          }
+        },
+        # Ligne 3 : latence et erreurs applicatives
+        {
+          yPos = 8, width = 6, height = 4
+          widget = {
+            title = "Latence du portail (uptime check)"
+            xyChart = {
+              dataSets = [{
+                timeSeriesQuery = { timeSeriesFilter = {
+                  filter      = "metric.type=\"monitoring.googleapis.com/uptime_check/request_latency\" AND resource.type=\"uptime_url\" AND metric.labels.check_id=\"${google_monitoring_uptime_check_config.portail_prod.uptime_check_id}\""
                   aggregation = { alignmentPeriod = "60s", perSeriesAligner = "ALIGN_MEAN" }
                 } }
                 plotType = "LINE"
+              }]
+            }
+          }
+        },
+        {
+          xPos = 6, yPos = 8, width = 6, height = 4
+          widget = {
+            title = "Erreurs applicatives (journaux severite >= ERROR)"
+            xyChart = {
+              dataSets = [{
+                timeSeriesQuery = { timeSeriesFilter = {
+                  filter      = "metric.type=\"logging.googleapis.com/user/${google_logging_metric.erreurs_prod.name}\""
+                  aggregation = { alignmentPeriod = "300s", perSeriesAligner = "ALIGN_SUM" }
+                } }
+                plotType = "STACKED_BAR"
               }]
             }
           }
