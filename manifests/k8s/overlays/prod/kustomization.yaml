@@ -11,14 +11,16 @@ resources:
 replicas:
   - name: portail-qualite
     count: 3
-  - name: api-capteurs
-    count: 3
 
 patches:
   - path: patch-configmap.yaml
     target:
       kind: ConfigMap
       name: foodtrack-config
+  - path: patch-hpa.yaml
+    target:
+      kind: HorizontalPodAutoscaler
+      name: api-capteurs
   - target:
       kind: StatefulSet
       name: cache-releves
