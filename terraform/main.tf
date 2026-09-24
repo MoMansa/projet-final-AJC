@@ -63,6 +63,8 @@ module "wif_github" {
     "roles/storage.bucketViewer",
     "roles/iam.viewer",
     "roles/iam.securityReviewer",
+    "roles/monitoring.viewer",
+    "roles/logging.viewer",
   ]
 }
 
@@ -77,4 +79,12 @@ resource "google_project_iam_member" "noeuds_gke_images" {
   project = var.project_id
   role    = "roles/artifactregistry.reader"
   member  = "serviceAccount:${module.compute.gke_service_account_email}"
+}
+
+module "observabilite" {
+  source            = "./modules/observabilite"
+  project_id        = var.project_id
+  equipe            = "b"
+  alert_email       = var.alert_email
+  portail_public_ip = var.portail_public_ip
 }

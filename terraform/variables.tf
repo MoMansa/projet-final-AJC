@@ -95,3 +95,12 @@ variable "bastion_machine_type" {
   description = "Type de machine du bastion"
   type        = string
 }
+
+variable "alert_email" {
+  type = string
+}
+
+variable "portail_public_ip" {
+  description = "IP de l'Ingress foodtrack-prod"
+  type        = string
+}
