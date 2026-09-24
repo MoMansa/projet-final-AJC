@@ -58,3 +58,36 @@ module "wif_github" {
   github_owner = var.github_owner
   github_repo  = var.github_repo
 }
+
+resource "google_storage_bucket_iam_member" "ci_tfstate" {
+  bucket = "foodtrack-b-tfstate-form-gke-eleve02-618b"
+  role   = "roles/storage.objectAdmin"
+  member = "serviceAccount:${module.wif_github.ci_service_account_email}"
+}
+
+resource "google_project_iam_member" "ci_lecture_plan" {
+  for_each = toset([
+    "roles/compute.viewer",
+    "roles/storage.bucketViewer",
+    "roles/iam.securityReviewer",
+    "roles/iam.workloadIdentityPoolViewer"
+  ])
+
+  project = var.project_id
+  role    = each.value
+  member  = "serviceAccount:${module.wif_github.ci_service_account_email}"
+}
+
+resource "google_storage_bucket_iam_member" "ci_etat_terraform" {
+  bucket = "foodtrack-b-tfstate-${var.project_id}"
+  role   = "roles/storage.objectAdmin"
+  member = "serviceAccount:${module.wif_github.ci_service_account_email}"
+}
+
+resource "google_artifact_registry_repository_iam_member" "noeuds_gke_images" {
+  project    = var.project_id
+  location   = var.region
+  repository = "foodtrack-b-images"
+  role       = "roles/artifactregistry.reader"
+  member     = "serviceAccount:foodtrack-b-gke-nodes@${var.project_id}.iam.gserviceaccount.com"
+}
