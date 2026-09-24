@@ -28,9 +28,19 @@ spec:
         app.kubernetes.io/name: portail-qualite
         app.kubernetes.io/part-of: foodtrack
     spec:
+      securityContext:                 # sécurité du Pod
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: nginx
-          image: nginx:1.30.5
+          image: nginxinc/nginx-unprivileged:1.30-alpine
+          securityContext:             # sécurité du conteneur nginx
+            runAsUser: 101
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
           ports:
             - name: http
               containerPort: 8080
@@ -70,6 +80,8 @@ spec:
               mountPath: /usr/share/nginx/html/index.html
               subPath: index.html
               readOnly: true
+            - name: tmp
+              mountPath: /tmp
       volumes:
         - name: conf
           configMap:
@@ -79,3 +91,5 @@ spec:
                 path: default.conf
               - key: index.html
                 path: index.html
+        - name: tmp
+          emptyDir: {}

@@ -25,3 +25,6 @@ node_count           = 2
 node_disk_type       = "pd-standard"
 node_disk_size_gb    = 50
 bastion_machine_type = "e2-micro"
+
+alert_email       = "21diouf.pape@gmail.com"
+portail_public_ip = "136.81.158.21"

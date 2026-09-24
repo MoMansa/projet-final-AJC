@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # Regroupe les commandes d'audit securite. A rediriger vers un fichier :
-#   ZONE=europe-west3-b ./audit_iam.sh > audit.txt
+#   ./audit_iam.sh > audit.txt
 set -uo pipefail
 
 EQUIPE="${EQUIPE:-b}"
-PROJECT="${PROJECT:-foodtrack-equipe-${EQUIPE}}"
+PROJECT="${PROJECT:-$(gcloud config get-value project 2>/dev/null)}"
+ZONE="${ZONE:-$(gcloud config get-value compute/zone 2>/dev/null)}"
 CLUSTER="foodtrack-${EQUIPE}-cluster"
 BASTION="foodtrack-${EQUIPE}-bastion"
 

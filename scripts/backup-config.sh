@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# Sauvegarde la config Kubernetes (ConfigMaps, Deployments, etc.) vers un bucket.
+# Sauvegarde la config Kubernetes (ConfigMaps, Deployments, etc.) vers le bucket de sauvegarde.
 # Usage : ./backup-config.sh
 set -euo pipefail
 
 EQUIPE="${EQUIPE:-b}"
-BUCKET="${BACKUP_BUCKET:-foodtrack-${EQUIPE}-backups}"
+PROJECT="${PROJECT:-$(gcloud config get-value project 2>/dev/null)}"
+BUCKET="${BACKUP_BUCKET:-foodtrack-${EQUIPE}-backups-${PROJECT}}"
 DATE="$(date -u +%Y%m%dT%H%M%SZ)"
 DOSSIER="$(mktemp -d)"
 
