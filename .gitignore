@@ -15,6 +15,7 @@ secret*.tfvars
 secrets/
 
 # Identifiants
+secret.env
 .env
 .env.*
 *.pem
