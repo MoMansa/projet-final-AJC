@@ -27,7 +27,7 @@ patches:
     patch: |-
       - op: replace
         path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
-        value: 20Gi
+        value: 10Gi
 
 secretGenerator:
   - name: foodtrack-api-config
