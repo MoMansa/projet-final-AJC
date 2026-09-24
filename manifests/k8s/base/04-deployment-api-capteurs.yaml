@@ -32,9 +32,19 @@ spec:
         app.kubernetes.io/part-of: foodtrack
     spec:
       terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: api
           image: us-docker.pkg.dev/google-samples/containers/gke/hello-app:2.0
+          securityContext:            
+            runAsUser: 65532
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
           ports:
             - name: http
               containerPort: 8080
