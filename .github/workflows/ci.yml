@@ -176,6 +176,7 @@ jobs:
           PID=$!
           trap 'kill "$PID" 2>/dev/null || true' EXIT
           curl -fsS --retry 12 --retry-connrefused --retry-delay 2 http://localhost:8080/healthz
+          echo "-----------------------------HEALTHCHECK-----------------------------"
           python3 scripts/healthcheck.py http://localhost:8080/api/
 
   deploy-test:
@@ -229,6 +230,7 @@ jobs:
           PID=$!
           trap 'kill "$PID" 2>/dev/null || true' EXIT
           curl -fsS --retry 12 --retry-connrefused --retry-delay 2 http://localhost:8080/healthz
+          echo "-----------------------------HEALTHCHECK-----------------------------"
           python3 scripts/healthcheck.py http://localhost:8080/api/
 
   deploy-prod:
@@ -282,4 +284,5 @@ jobs:
           PID=$!
           trap 'kill "$PID" 2>/dev/null || true' EXIT
           curl -fsS --retry 12 --retry-connrefused --retry-delay 2 http://localhost:8080/healthz
+          echo "-----------------------------HEALTHCHECK-----------------------------"
           python3 scripts/healthcheck.py http://localhost:8080/api/
