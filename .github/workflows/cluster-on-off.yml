@@ -2,9 +2,9 @@ name: Horaires du cluster
 
 on:
   schedule:
-    - cron: "00 7 * * *" 
+    - cron: "14 7 * * *" 
       timezone: "Europe/Paris"
-    - cron: "00 19 * * *"
+    - cron: "14 19 * * *"
       timezone: "Europe/Paris"
 
 permissions:
@@ -26,13 +26,13 @@ jobs:
       - uses: google-github-actions/setup-gcloud@v3
 
       - name: Allumer le cluster
-        if: github.event.schedule == '00 7 * * *'
+        if: github.event.schedule == '14 7 * * *'
         env:
           ZONE: europe-west3-b
         run: bash scripts/cluster-nightswitch.sh on
 
       - name: Eteindre le cluster
-        if: github.event.schedule == '00 19 * * *'
+        if: github.event.schedule == '14 19 * * *'
         env:
           ZONE: europe-west3-b
         run: bash scripts/cluster-nightswitch.sh off
