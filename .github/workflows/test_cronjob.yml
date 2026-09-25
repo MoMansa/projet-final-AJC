@@ -1,0 +1,19 @@
+name: test-message
+
+on:
+  workflow_dispatch:        # bouton « Run workflow » dans l'onglet Actions
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  bonjour:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Afficher un message
+        run: |
+          echo "Bonjour depuis GitHub Actions !"
+          echo "Branche : ${{ github.ref_name }}, commit : ${{ github.sha }}"
+          echo "Déclenché par : ${{ github.actor }}, événement : ${{ github.event_name }}"
