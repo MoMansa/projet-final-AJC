@@ -32,4 +32,5 @@ if [ -n "${ZONE:-}" ]; then
 fi
 
 echo; echo "== Secrets dans l'historique Git (lancer depuis le depot) =="
+cd ..
 git log --all --full-history --name-only --pretty=format:%h -- "*.json" "*.tfvars" ".env"

@@ -16,14 +16,15 @@ Bastion FoodTrack ?quipe B               foodtrack-b-bastion@form-gke-eleve02-61
 N?uds GKE FoodTrack ?quipe B             foodtrack-b-gke-nodes@form-gke-eleve02-618b.iam.gserviceaccount.com  False
 
 == Pare-feu ==
-NAME                                  SOURCE_RANGES    TARGET_TAGS                            ALLOW
-default-allow-icmp                    0.0.0.0/0                                               icmp
-default-allow-internal                10.128.0.0/9                                            tcp:0-65535,udp:0-65535,icmp
-default-allow-rdp                     0.0.0.0/0                                               tcp:3389
-default-allow-ssh                     0.0.0.0/0                                               tcp:22
-foodtrack-b-allow-iap-ssh             35.235.240.0/20  foodtrack-b-bastion                    tcp:22
-gke-foodtrack-b-cluster-d389419f-all  10.21.0.0/16     gke-foodtrack-b-cluster-d389419f-node  tcp,udp,icmp,esp,ah,sctp
-gke-foodtrack-b-cluster-d389419f-vms  10.20.0.0/20     gke-foodtrack-b-cluster-d389419f-node  udp:1-65535,icmp,tcp:1-65535
+NAME                                  SOURCE_RANGES                 TARGET_TAGS                            ALLOW
+default-allow-icmp                    0.0.0.0/0                                                            icmp
+default-allow-internal                10.128.0.0/9                                                         tcp:0-65535,udp:0-65535,icmp
+default-allow-rdp                     0.0.0.0/0                                                            tcp:3389
+default-allow-ssh                     0.0.0.0/0                                                            tcp:22
+foodtrack-b-allow-iap-ssh             35.235.240.0/20               foodtrack-b-bastion                    tcp:22
+gke-foodtrack-b-cluster-d389419f-all  10.21.0.0/16                  gke-foodtrack-b-cluster-d389419f-node  tcp,udp,icmp,esp,ah,sctp
+gke-foodtrack-b-cluster-d389419f-vms  10.20.0.0/20                  gke-foodtrack-b-cluster-d389419f-node  udp:1-65535,icmp,tcp:1-65535
+k8s-fw-l7--cd717d9baa1db044           35.191.0.0/16,130.211.0.0/22  gke-foodtrack-b-cluster-d389419f-node  tcp:8080
 
 == Bastion ==
 metadata:
@@ -47,3 +48,34 @@ privateClusterConfig:
   publicEndpoint: 34.159.220.16
 
 == Secrets dans l'historique Git (lancer depuis le depot) ==
+9263cf3
+c68c448
+c2ec496
+bb8cd59
+terraform/dev.tfvars
+terraform/prod.tfvars
+terraform/test.tfvars
+
+441e885
+b94fdaa
+bb8a106
+1df5dea
+f15391f
+terraform/dev.tfvars
+terraform/prod.tfvars
+terraform/test.tfvars
+
+4c262c7
+terraform/terraform.tfvars
+
+8dc881b
+terraform/terraform.tfvars
+
+5b99902
+terraform/terraform.tfvars
+
+bddda4d
+terraform/terraform.tfvars
+
+372d28a
+terraform/team-b.tfvars
