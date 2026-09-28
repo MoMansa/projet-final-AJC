@@ -106,9 +106,9 @@ resource "google_monitoring_dashboard" "foodtrack_prod" {
             xyChart = {
               dataSets = [{
                 timeSeriesQuery = {
-                  prometheusQuery = "sum by (pod) (kube_pod_status_ready{namespace=\"foodtrack-prod\", condition=\"true\"})"
+                  prometheusQuery = "sum(kube_pod_container_status_ready{namespace=\"foodtrack-prod\"})"
                 }
-                plotType = "STACKED_AREA"
+                plotType = "LINE"
               }]
             }
           }
